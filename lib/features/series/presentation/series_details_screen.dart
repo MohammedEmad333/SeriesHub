@@ -48,8 +48,10 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PlayerScreen(
+          series: widget.series,
           episode: episode,
           sources: sources,
+          libraryStore: widget.libraryStore,
         ),
       ),
     );
