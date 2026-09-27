@@ -15,6 +15,7 @@ class HomeScreen extends StatelessWidget {
     required this.availableProviders,
     required this.providerMetadata,
     required this.onProviderSelected,
+    required this.onManageSourcesRequested,
     required this.libraryStore,
     required this.onSearchRequested,
   });
@@ -23,6 +24,7 @@ class HomeScreen extends StatelessWidget {
   final List<SeriesProvider> availableProviders;
   final Map<String, RemoteProviderDescriptor> providerMetadata;
   final ValueChanged<String> onProviderSelected;
+  final VoidCallback onManageSourcesRequested;
   final LibraryStore libraryStore;
   final VoidCallback onSearchRequested;
 
@@ -110,6 +112,11 @@ class HomeScreen extends StatelessWidget {
                   ),
               ],
             ),
+          IconButton(
+            tooltip: 'إدارة المصادر',
+            onPressed: onManageSourcesRequested,
+            icon: const Icon(Icons.tune),
+          ),
           IconButton(
             tooltip: 'بحث',
             onPressed: onSearchRequested,
