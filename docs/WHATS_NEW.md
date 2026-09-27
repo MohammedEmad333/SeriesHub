@@ -1,5 +1,15 @@
 # What's New
 
+## 0.15.0+15
+
+- Converted the remote provider repository to an Aniyomi-style repo layout.
+- index.json and index.min.json are now extension arrays with package, language, version, source, and baseUrl metadata.
+- SeriesHub now reads the new array format directly.
+- Kept backward compatibility with the previous object-based provider index.
+- repo.json now uses the compact repository metadata format.
+- Provider implementations remain built into the app; the repository does not download executable code.
+
+
 ## 0.14.0+14
 
 - Added WeTV Arabic as a standalone playable source.
