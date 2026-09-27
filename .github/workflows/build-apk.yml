@@ -19,6 +19,7 @@ jobs:
       - name: Generate Android project
         run: |
           flutter create .             --platforms=android             --org com.mohammedemad333             --project-name serieshub
+          rm -f test/widget_test.dart
 
       - name: Install dependencies
         run: flutter pub get
