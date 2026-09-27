@@ -4,16 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:serieshub/core/providers/remote_provider_repository.dart';
 
 void main() {
-  test('loads provider index and exposes status', () async {
+  test('loads Aniyomi-style provider array and exposes status', () async {
     final repository = RemoteProviderRepository(
       client: MockClient(
         (_) async => http.Response(
-          '{"version":1,"providers":['
-          '{"id":"official-youtube","name":"Official YouTube",'
-          '"enabled":true,"status":"working","playback":true},'
-          '{"id":"roya","name":"Roya",'
-          '"enabled":false,"status":"disabled","playback":false}'
-          ']}',
+          '['
+          '{"id":"official-youtube","name":"SeriesHub: Official YouTube",'
+          '"pkg":"serieshub.provider.officialyoutube","enabled":true,'
+          '"status":"working","playback":true,"sources":[]},'
+          '{"id":"roya","name":"SeriesHub: Roya","pkg":"serieshub.provider.roya",'
+          '"enabled":false,"status":"disabled","playback":false,"sources":[]}'
+          ']',
           200,
         ),
       ),
@@ -35,5 +36,22 @@ void main() {
     );
 
     expect(await repository.load(), isNull);
+  });
+
+  test('still accepts legacy object indexes', () {
+  final index = RemoteProviderIndex.fromDecoded({
+    'version': 1,
+    'providers': [
+      {
+        'id': 'legacy',
+        'name': 'Legacy',
+        'enabled': true,
+        'status': 'working',
+        'playback': true,
+      },
+    ],
+  });
+
+    expect(index.providers.single.id, 'legacy');
   });
 }

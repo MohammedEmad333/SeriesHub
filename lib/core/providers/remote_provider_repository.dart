@@ -40,9 +40,18 @@ class RemoteProviderIndex {
   final int version;
   final List<RemoteProviderDescriptor> providers;
 
-  factory RemoteProviderIndex.fromJson(Map<String, dynamic> json) {
-    final values = json['providers'];
-    if (json['version'] != 1 || values is! List) {
+  factory RemoteProviderIndex.fromDecoded(Object? decoded) {
+    final List<dynamic> values;
+
+    if (decoded is List) {
+      values = decoded;
+    } else if (decoded is Map<String, dynamic>) {
+      final legacy = decoded['providers'];
+      if (decoded['version'] != 1 || legacy is! List) {
+        throw const FormatException('Unsupported provider index.');
+      }
+      values = legacy;
+    } else {
       throw const FormatException('Unsupported provider index.');
     }
 
@@ -85,10 +94,11 @@ class RemoteProviderRepository {
         return null;
       }
 
-      final decoded = jsonDecode(utf8.decode(response.bodyBytes, allowMalformed: true));
-      if (decoded is! Map<String, dynamic>) return null;
+      final decoded = jsonDecode(
+        utf8.decode(response.bodyBytes, allowMalformed: true),
+      );
 
-      return RemoteProviderIndex.fromJson(decoded);
+      return RemoteProviderIndex.fromDecoded(decoded);
     } on Object {
       return null;
     }
