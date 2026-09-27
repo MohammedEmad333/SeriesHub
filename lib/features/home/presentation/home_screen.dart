@@ -4,9 +4,7 @@ import '../../../core/library/library_store.dart';
 import '../../../core/library/watch_progress.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/series_provider.dart';
-import '../../library/presentation/library_screen.dart';
 import '../../player/presentation/player_screen.dart';
-import '../../search/presentation/search_screen.dart';
 import '../../series/presentation/series_details_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -14,10 +12,12 @@ class HomeScreen extends StatelessWidget {
     super.key,
     required this.provider,
     required this.libraryStore,
+    required this.onSearchRequested,
   });
 
   final SeriesProvider provider;
   final LibraryStore libraryStore;
+  final VoidCallback onSearchRequested;
 
   Future<void> _resumeWatching(
     BuildContext context,
@@ -35,17 +35,6 @@ class HomeScreen extends StatelessWidget {
           episode: progress.episode,
           episodes: episodes,
           sources: sources,
-          provider: provider,
-          libraryStore: libraryStore,
-        ),
-      ),
-    );
-  }
-
-  void _openSearch(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => SearchScreen(
           provider: provider,
           libraryStore: libraryStore,
         ),
@@ -73,7 +62,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: 'بحث',
-            onPressed: () => _openSearch(context),
+            onPressed: onSearchRequested,
             icon: const Icon(Icons.search),
           ),
         ],
@@ -225,52 +214,6 @@ class HomeScreen extends StatelessWidget {
             },
           );
         },
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 0,
-        onDestinationSelected: (index) {
-          if (index == 1) {
-            _openSearch(context);
-          } else if (index == 2) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => LibraryScreen(
-                  store: libraryStore,
-                  mode: LibraryMode.favorites,
-                ),
-              ),
-            );
-          } else if (index == 3) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => LibraryScreen(
-                  store: libraryStore,
-                  mode: LibraryMode.history,
-                ),
-              ),
-            );
-          }
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'الرئيسية',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.search),
-            label: 'البحث',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: 'المفضلة',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history),
-            label: 'السجل',
-          ),
-        ],
       ),
     );
   }
