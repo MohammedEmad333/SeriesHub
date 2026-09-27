@@ -1,5 +1,13 @@
 # What's New
 
+## 0.13.0+13
+
+- Added YOUKU Arabic as a standalone playable source.
+- Added the first three public full episodes of الحب من أول نظرة from the verified YOUKU Arabic channel.
+- Added availability checks before exposing playback.
+- YOUKU Arabic is controlled by the remote provider repository and appears in the Sources screen.
+
+
 ## 0.12.0+12
 
 - Added an in-app Sources screen.

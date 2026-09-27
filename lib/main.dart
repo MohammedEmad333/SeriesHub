@@ -23,6 +23,10 @@ Future<void> main() async {
       OfficialYouTubeProvider(),
       language: SeriesLanguage.subtitled,
     ),
+    'youku-arabic': ExternalSeriesProvider(
+      YoukuArabicProvider(),
+      language: SeriesLanguage.subtitled,
+    ),
     'roya': ExternalSeriesProvider(RoyaProvider()),
     'watanflix': ExternalSeriesProvider(WatanFlixProvider()),
   };
@@ -40,7 +44,6 @@ Future<void> main() async {
         activeIds.add(descriptor.id);
       }
     }
-
   }
 
   final registry = ProviderRegistry(
