@@ -42,7 +42,10 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
     });
   }
 
-  Future<void> _playEpisode(Episode episode) async {
+  Future<void> _playEpisode(
+    Episode episode,
+    List<Episode> episodes,
+  ) async {
     final sources = await widget.provider.getPlaybackSources(episode.id);
     if (!mounted) return;
     await Navigator.of(context).push(
@@ -50,7 +53,9 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
         builder: (_) => PlayerScreen(
           series: widget.series,
           episode: episode,
+          episodes: episodes,
           sources: sources,
+          provider: widget.provider,
           libraryStore: widget.libraryStore,
         ),
       ),
@@ -152,7 +157,10 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                               : '${episode.duration!.inMinutes} دقيقة',
                         ),
                         trailing: const Icon(Icons.play_arrow),
-                        onTap: () => _playEpisode(episode),
+                        onTap: () => _playEpisode(
+                          episode,
+                          snapshot.data!,
+                        ),
                       ),
                   ],
                 );
