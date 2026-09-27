@@ -33,6 +33,13 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
   void initState() {
     super.initState();
     widget.libraryStore.addToHistory(widget.series);
+    _selectInitialSeason();
+  }
+
+  Future<void> _selectInitialSeason() async {
+    final seasons = await _seasons;
+    if (!mounted || seasons.isEmpty || _selectedSeasonId != null) return;
+    _selectSeason(seasons.first);
   }
 
   void _selectSeason(Season season) {
@@ -48,6 +55,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
   ) async {
     final sources = await widget.provider.getPlaybackSources(episode.id);
     if (!mounted) return;
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PlayerScreen(
@@ -60,11 +68,16 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
         ),
       ),
     );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final series = widget.series;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(series.title),
@@ -72,10 +85,14 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
           AnimatedBuilder(
             animation: widget.libraryStore,
             builder: (context, _) {
-              final isFavorite = widget.libraryStore.isFavorite(series.id);
+              final isFavorite =
+                  widget.libraryStore.isFavorite(series.id);
+
               return IconButton(
-                tooltip: isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
-                onPressed: () => widget.libraryStore.toggleFavorite(series),
+                tooltip:
+                    isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
+                onPressed: () =>
+                    widget.libraryStore.toggleFavorite(series),
                 icon: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,
                 ),
@@ -88,7 +105,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Container(
-            height: 220,
+            height: 230,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -97,38 +114,68 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
             child: const Icon(Icons.movie_outlined, size: 72),
           ),
           const SizedBox(height: 16),
-          Text(series.title, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          Text(series.overview),
-          const SizedBox(height: 8),
-          Row(
+          Text(
+            series.title,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              if (series.year != null) Text('${series.year}'),
-              if (series.rating != null) ...[
-                const SizedBox(width: 12),
-                const Icon(Icons.star, size: 18),
-                const SizedBox(width: 4),
-                Text(series.rating!.toStringAsFixed(1)),
-              ],
+              if (series.year != null)
+                Chip(
+                  avatar: const Icon(Icons.calendar_month, size: 17),
+                  label: Text('${series.year}'),
+                ),
+              if (series.rating != null)
+                Chip(
+                  avatar: const Icon(Icons.star, size: 17),
+                  label: Text(series.rating!.toStringAsFixed(1)),
+                ),
+              if (series.country != null)
+                Chip(
+                  avatar: const Icon(Icons.public, size: 17),
+                  label: Text(series.country!),
+                ),
+              Chip(
+                avatar: const Icon(Icons.translate, size: 17),
+                label: Text(_languageLabel(series.language)),
+              ),
+              for (final genre in series.genres)
+                Chip(label: Text(genre)),
             ],
           ),
-          const SizedBox(height: 20),
-          Text('المواسم', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 16),
+          Text(series.overview),
+          const SizedBox(height: 24),
+          Text(
+            'المواسم والحلقات',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 12),
           FutureBuilder<List<Season>>(
             future: _seasons,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
+
               final seasons = snapshot.data!;
+
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   for (final season in seasons)
                     ChoiceChip(
-                      label: Text(season.title),
+                      label: Text(
+                        season.episodeCount == null
+                            ? season.title
+                            : '${season.title} · ${season.episodeCount} حلقات',
+                      ),
                       selected: _selectedSeasonId == season.id,
                       onSelected: (_) => _selectSeason(season),
                     ),
@@ -142,32 +189,83 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
               future: _episodes,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 }
-                return Column(
-                  children: [
-                    for (final episode in snapshot.data!)
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: CircleAvatar(child: Text('${episode.number}')),
-                        title: Text(episode.title),
-                        subtitle: Text(
-                          episode.duration == null
-                              ? ''
-                              : '${episode.duration!.inMinutes} دقيقة',
-                        ),
-                        trailing: const Icon(Icons.play_arrow),
-                        onTap: () => _playEpisode(
-                          episode,
-                          snapshot.data!,
-                        ),
-                      ),
-                  ],
+
+                final episodes = snapshot.data!;
+
+                return AnimatedBuilder(
+                  animation: widget.libraryStore,
+                  builder: (context, _) {
+                    return Column(
+                      children: [
+                        for (final episode in episodes)
+                          _EpisodeTile(
+                            episode: episode,
+                            progress: widget.libraryStore
+                                .progressForEpisode(episode.id)
+                                ?.fraction,
+                            onTap: () =>
+                                _playEpisode(episode, episodes),
+                          ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
         ],
       ),
+    );
+  }
+
+  static String _languageLabel(SeriesLanguage language) {
+    return switch (language) {
+      SeriesLanguage.arabic => 'عربي',
+      SeriesLanguage.subtitled => 'مترجم',
+      SeriesLanguage.dubbed => 'مدبلج',
+    };
+  }
+}
+
+class _EpisodeTile extends StatelessWidget {
+  const _EpisodeTile({
+    required this.episode,
+    required this.progress,
+    required this.onTap,
+  });
+
+  final Episode episode;
+  final double? progress;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasProgress = progress != null && progress! > 0;
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: CircleAvatar(
+        child: Text('${episode.number}'),
+      ),
+      title: Text(episode.title),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (episode.duration != null)
+            Text('${episode.duration!.inMinutes} دقيقة'),
+          if (hasProgress) ...[
+            const SizedBox(height: 6),
+            LinearProgressIndicator(value: progress),
+          ],
+        ],
+      ),
+      trailing: Icon(
+        hasProgress ? Icons.play_circle_fill : Icons.play_arrow,
+      ),
+      onTap: onTap,
     );
   }
 }
