@@ -1,5 +1,14 @@
 # What's New
 
+## 0.8.0+8
+
+- Added a GitHub Actions Android build pipeline.
+- Android platform files are generated automatically during the build.
+- Release APKs are built from main and manual workflow runs.
+- APK output is uploaded as a downloadable GitHub Actions artifact.
+- The Android package namespace is generated under com.mohammedemad333.serieshub.
+- Tests run before producing the APK artifact.
+
 ## 0.7.0+7
 
 - Bottom navigation is now a persistent app shell instead of stacking screens.
