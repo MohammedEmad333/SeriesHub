@@ -9,9 +9,9 @@ void main() {
       client: MockClient(
         (_) async => http.Response(
           '{"version":1,"providers":['
-          '{"id":"official-youtube","name":"YouTube الرسمي",'
+          '{"id":"official-youtube","name":"Official YouTube",'
           '"enabled":true,"status":"working","playback":true},'
-          '{"id":"roya","name":"Roya TV",'
+          '{"id":"roya","name":"Roya",'
           '"enabled":false,"status":"disabled","playback":false}'
           ']}',
           200,
