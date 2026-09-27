@@ -1,5 +1,16 @@
 # What's New
 
+## 0.6.0+6
+
+- Advanced search filters for language, country, genre, and year.
+- Search sorting by relevance, rating, newest, or oldest.
+- Search now matches titles, descriptions, genres, and countries.
+- Series details show country, language, genres, year, and rating.
+- The first season loads automatically.
+- Episode rows show saved watch progress.
+- Continue Watching cards now resume the episode directly in the player.
+- Mock catalog expanded with richer metadata and multiple seasons.
+
 ## 0.5.0+5
 
 - Favorites now persist after closing and reopening the app.
