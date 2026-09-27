@@ -11,11 +11,15 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
     required this.provider,
+    required this.availableProviders,
+    required this.onProviderSelected,
     required this.libraryStore,
     required this.onSearchRequested,
   });
 
   final SeriesProvider provider;
+  final List<SeriesProvider> availableProviders;
+  final ValueChanged<String> onProviderSelected;
   final LibraryStore libraryStore;
   final VoidCallback onSearchRequested;
 
@@ -27,6 +31,14 @@ class HomeScreen extends StatelessWidget {
     final sources = await provider.getPlaybackSources(progress.episode.id);
 
     if (!context.mounted) return;
+    if (sources.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('هذا المصدر لا يوفر رابط تشغيل مباشر بعد.'),
+        ),
+      );
+      return;
+    }
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -58,8 +70,23 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SeriesHub'),
+        title: Text('SeriesHub · ${provider.name}'),
         actions: [
+          if (availableProviders.length > 1)
+            PopupMenuButton<String>(
+              tooltip: 'المصدر',
+              initialValue: provider.id,
+              icon: const Icon(Icons.source_outlined),
+              onSelected: onProviderSelected,
+              itemBuilder: (context) => [
+                for (final item in availableProviders)
+                  CheckedPopupMenuItem<String>(
+                    value: item.id,
+                    checked: item.id == provider.id,
+                    child: Text(item.name),
+                  ),
+              ],
+            ),
           IconButton(
             tooltip: 'بحث',
             onPressed: onSearchRequested,
