@@ -1,5 +1,13 @@
 # What's New
 
+## 0.14.0+14
+
+- Added WeTV Arabic as a standalone playable source.
+- Added four verified public full episodes of الأفلام / Filter.
+- Added availability checks before exposing playback.
+- WeTV Arabic is managed through the remote provider repository and Sources screen.
+
+
 ## 0.13.0+13
 
 - Added YOUKU Arabic as a standalone playable source.
