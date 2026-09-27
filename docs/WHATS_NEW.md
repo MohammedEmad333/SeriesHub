@@ -1,5 +1,16 @@
 # What's New
 
+## 0.12.0+12
+
+- Added an in-app Sources screen.
+- Added manual refresh for the remote provider repository.
+- Provider enable/disable changes now apply immediately without restarting the app.
+- Added clear source states for playback, metadata-only, broken, and disabled providers.
+- Kept the local mock provider outside remote repository control.
+- Remote disablement is respected even when every external provider is disabled.
+- Added tests for live provider activation changes.
+
+
 ## 0.11.0+11
 
 - Added a remote provider repository loader backed by SeriesHub-Providers.
