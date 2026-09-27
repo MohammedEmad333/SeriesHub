@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/providers/mock_series_provider.dart';
 import 'features/home/presentation/home_screen.dart';
 
 void main() {
@@ -11,6 +12,8 @@ class SeriesHubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = MockSeriesProvider();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SeriesHub',
@@ -20,9 +23,9 @@ class SeriesHubApp extends StatelessWidget {
         brightness: Brightness.dark,
         colorSchemeSeed: const Color(0xFFE65100),
       ),
-      home: const Directionality(
+      home: Directionality(
         textDirection: TextDirection.rtl,
-        child: HomeScreen(),
+        child: HomeScreen(provider: provider),
       ),
     );
   }
