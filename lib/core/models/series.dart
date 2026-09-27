@@ -18,4 +18,26 @@ class Series {
   final String? posterUrl;
   final int? year;
   final double? rating;
+
+  Map<String, Object?> toJson() => {
+        'id': id,
+        'title': title,
+        'overview': overview,
+        'language': language.name,
+        'posterUrl': posterUrl,
+        'year': year,
+        'rating': rating,
+      };
+
+  factory Series.fromJson(Map<String, Object?> json) {
+    return Series(
+      id: json['id']! as String,
+      title: json['title']! as String,
+      overview: json['overview']! as String,
+      language: SeriesLanguage.values.byName(json['language']! as String),
+      posterUrl: json['posterUrl'] as String?,
+      year: json['year'] as int?,
+      rating: (json['rating'] as num?)?.toDouble(),
+    );
+  }
 }
