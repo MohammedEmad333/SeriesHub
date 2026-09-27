@@ -28,30 +28,31 @@ Future<void> main() async {
   };
 
   final remoteIndex = await RemoteProviderRepository().load();
-  final providers = <SeriesProvider>[];
   final metadata = <String, RemoteProviderDescriptor>{};
+  final activeIds = <String>{};
 
   if (remoteIndex == null) {
-    providers.addAll(builtIns.values);
+    activeIds.addAll(builtIns.keys);
   } else {
     for (final descriptor in remoteIndex.providers) {
       metadata[descriptor.id] = descriptor;
-      if (!descriptor.isUsable) continue;
-
-      final provider = builtIns[descriptor.id];
-      if (provider != null) providers.add(provider);
+      if (descriptor.isUsable && builtIns.containsKey(descriptor.id)) {
+        activeIds.add(descriptor.id);
+      }
     }
 
-    if (providers.isEmpty) {
-      providers.addAll(builtIns.values);
+    if (activeIds.isEmpty) {
+      activeIds.addAll(builtIns.keys);
     }
   }
 
-  providers.add(MockSeriesProvider());
-
   final registry = ProviderRegistry(
-    providers,
+    [
+      ...builtIns.values,
+      MockSeriesProvider(),
+    ],
     metadata: metadata,
+    activeIds: activeIds,
   );
 
   runApp(
