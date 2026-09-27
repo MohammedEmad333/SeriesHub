@@ -33,6 +33,11 @@ Future<void> main() async {
     ),
     'roya': ExternalSeriesProvider(RoyaProvider()),
     'watanflix': ExternalSeriesProvider(WatanFlixProvider()),
+    'laroza': ExternalSeriesProvider(LarozaProvider()),
+    'elcinema': ExternalSeriesProvider(ElCinemaProvider()),
+    'egibest': ExternalSeriesProvider(EgyBestProvider()),
+    'cima4u': ExternalSeriesProvider(Cima4uProvider()),
+    'dramacafe': ExternalSeriesProvider(DramaCafeProvider()),
   };
 
   final remoteIndex = await RemoteProviderRepository().load();
