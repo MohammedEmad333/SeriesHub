@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
 import '../../../core/providers/provider_registry.dart';
-import '../../../core/providers/remote_provider_repository.dart';
 import '../../../core/providers/series_provider.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../library/presentation/library_screen.dart';
