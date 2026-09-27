@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:serieshub_providers/serieshub_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/library/library_store.dart';
+import 'core/providers/external_series_provider.dart';
 import 'core/providers/mock_series_provider.dart';
+import 'core/providers/provider_registry.dart';
 import 'features/shell/presentation/app_shell.dart';
 
 Future<void> main() async {
@@ -12,21 +15,31 @@ Future<void> main() async {
   final libraryStore = LibraryStore(preferences);
   await libraryStore.load();
 
-  runApp(SeriesHubApp(libraryStore: libraryStore));
+  final registry = ProviderRegistry([
+    ExternalSeriesProvider(WatanFlixProvider()),
+    MockSeriesProvider(),
+  ]);
+
+  runApp(
+    SeriesHubApp(
+      libraryStore: libraryStore,
+      registry: registry,
+    ),
+  );
 }
 
 class SeriesHubApp extends StatelessWidget {
   const SeriesHubApp({
     super.key,
     required this.libraryStore,
+    required this.registry,
   });
 
   final LibraryStore libraryStore;
+  final ProviderRegistry registry;
 
   @override
   Widget build(BuildContext context) {
-    final provider = MockSeriesProvider();
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SeriesHub',
@@ -39,7 +52,7 @@ class SeriesHubApp extends StatelessWidget {
       home: Directionality(
         textDirection: TextDirection.rtl,
         child: AppShell(
-          provider: provider,
+          registry: registry,
           libraryStore: libraryStore,
         ),
       ),

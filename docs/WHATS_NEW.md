@@ -1,5 +1,14 @@
 # What's New
 
+## 0.9.0+9
+
+- Added the external SeriesHub Providers package pinned to a known commit.
+- Added WatanFlix as the first external source.
+- Added a provider adapter so external source models stay isolated from app UI models.
+- Added a source selector on the Home screen.
+- Added safe handling when a provider has metadata/episodes but no direct playback resource.
+- Added adapter tests for series, seasons, episodes, and playback mapping.
+
 ## 0.8.0+8
 
 - Added a GitHub Actions Android build pipeline.
