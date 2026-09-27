@@ -27,6 +27,10 @@ Future<void> main() async {
       YoukuArabicProvider(),
       language: SeriesLanguage.subtitled,
     ),
+    'wetv-arabic': ExternalSeriesProvider(
+      WeTvArabicProvider(),
+      language: SeriesLanguage.subtitled,
+    ),
     'roya': ExternalSeriesProvider(RoyaProvider()),
     'watanflix': ExternalSeriesProvider(WatanFlixProvider()),
   };
