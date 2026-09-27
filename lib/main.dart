@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/library/library_store.dart';
 import 'core/providers/mock_series_provider.dart';
-import 'features/home/presentation/home_screen.dart';
+import 'features/shell/presentation/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +38,7 @@ class SeriesHubApp extends StatelessWidget {
       ),
       home: Directionality(
         textDirection: TextDirection.rtl,
-        child: HomeScreen(
+        child: AppShell(
           provider: provider,
           libraryStore: libraryStore,
         ),
