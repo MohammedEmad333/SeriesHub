@@ -1,39 +1,41 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
 import '../../../core/library/watch_progress.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/remote_provider_repository.dart';
-import '../../../core/providers/series_provider.dart';
+import '../../../core/providers/series_widget.provider.dart';
 import '../../player/presentation/playback_launcher.dart';
 import '../../series/presentation/series_details_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.provider,
-    required this.availableProviders,
-    required this.providerMetadata,
-    required this.onProviderSelected,
-    required this.onManageSourcesRequested,
-    required this.libraryStore,
-    required this.onSearchRequested,
+    required this.widget.availableProviders,
+    required this.widget.providerMetadata,
+    required this.widget.onProviderSelected,
+    required this.widget.onManageSourcesRequested,
+    required this.widget.libraryStore,
+    required this.widget.onSearchRequested,
   });
 
   final SeriesProvider provider;
-  final List<SeriesProvider> availableProviders;
-  final Map<String, RemoteProviderDescriptor> providerMetadata;
-  final ValueChanged<String> onProviderSelected;
-  final VoidCallback onManageSourcesRequested;
-  final LibraryStore libraryStore;
-  final VoidCallback onSearchRequested;
+  final List<SeriesProvider> widget.availableProviders;
+  final Map<String, RemoteProviderDescriptor> widget.providerMetadata;
+  final ValueChanged<String> widget.onProviderSelected;
+  final VoidCallback widget.onManageSourcesRequested;
+  final LibraryStore widget.libraryStore;
+  final VoidCallback widget.onSearchRequested;
 
   Future<void> _resumeWatching(
     BuildContext context,
     WatchProgress progress,
   ) async {
-    final episodes = await provider.getEpisodes(progress.episode.seasonId);
-    final sources = await provider.getPlaybackSources(progress.episode.id);
+    final episodes = await widget.provider.getEpisodes(progress.episode.seasonId);
+    final sources = await widget.provider.getPlaybackSources(progress.episode.id);
 
     if (!context.mounted) return;
     if (sources.isEmpty) {
@@ -53,7 +55,7 @@ class HomeScreen extends StatelessWidget {
           episodes: episodes,
           sources: sources,
           provider: provider,
-          libraryStore: libraryStore,
+          widget.libraryStore: widget.libraryStore,
         ),
       ),
     );
@@ -65,7 +67,7 @@ class HomeScreen extends StatelessWidget {
         builder: (_) => SeriesDetailsScreen(
           series: series,
           provider: provider,
-          libraryStore: libraryStore,
+          widget.libraryStore: widget.libraryStore,
         ),
       ),
     );
@@ -75,38 +77,75 @@ class HomeScreen extends StatelessWidget {
     SeriesProvider provider,
     RemoteProviderDescriptor? metadata,
   ) {
-    if (metadata == null) return provider.name;
+    if (metadata == null) return widget.provider.name;
 
     return switch (metadata.status) {
-      'working' when metadata.playback => '${provider.name} · تشغيل',
-      'metadata_only' => '${provider.name} · بيانات فقط',
-      'broken' => '${provider.name} · متوقف',
-      'disabled' => '${provider.name} · معطل',
-      _ => provider.name,
+      'working' when metadata.playback => '${widget.provider.name} · تشغيل',
+      'metadata_only' => '${widget.provider.name} · بيانات فقط',
+      'broken' => '${widget.provider.name} · متوقف',
+      'disabled' => '${widget.provider.name} · معطل',
+      _ => widget.provider.name,
     };
+  }
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  static const _browseTimeout = Duration(seconds: 20);
+  late Future<List<Series>> _browseFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.widget.provider.id != widget.widget.provider.id) {
+      _reload();
+    }
+  }
+
+  void _reload() {
+    _browseFuture = widget.widget.provider.browse().timeout(_browseTimeout);
+  }
+
+  void _retry() {
+    setState(_reload);
+  }
+
+  String _errorText(Object? error) {
+    if (error is TimeoutException) {
+      return 'انتهت مهلة الاتصال بالمصدر. جرّب مرة أخرى أو اختر مصدرًا آخر.';
+    }
+    return 'تعذر تحميل محتوى ${widget.widget.provider.name}. قد يكون الموقع محجوبًا أو تغيّرت بنيته.';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SeriesHub · ${provider.name}'),
+        title: Text('SeriesHub · ${widget.provider.name}'),
         actions: [
-          if (availableProviders.length > 1)
+          if (widget.availableProviders.length > 1)
             PopupMenuButton<String>(
               tooltip: 'المصدر',
-              initialValue: provider.id,
+              initialValue: widget.provider.id,
               icon: const Icon(Icons.source_outlined),
-              onSelected: onProviderSelected,
+              onSelected: widget.onProviderSelected,
               itemBuilder: (context) => [
-                for (final item in availableProviders)
+                for (final item in widget.availableProviders)
                   CheckedPopupMenuItem<String>(
                     value: item.id,
-                    checked: item.id == provider.id,
+                    checked: item.id == widget.provider.id,
                     child: Text(
                       _providerLabel(
                         item,
-                        providerMetadata[item.id],
+                        widget.providerMetadata[item.id],
                       ),
                     ),
                   ),
@@ -114,24 +153,49 @@ class HomeScreen extends StatelessWidget {
             ),
           IconButton(
             tooltip: 'إدارة المصادر',
-            onPressed: onManageSourcesRequested,
+            onPressed: widget.onManageSourcesRequested,
             icon: const Icon(Icons.tune),
           ),
           IconButton(
             tooltip: 'بحث',
-            onPressed: onSearchRequested,
+            onPressed: widget.onSearchRequested,
             icon: const Icon(Icons.search),
           ),
         ],
       ),
       body: FutureBuilder<List<Series>>(
-        future: provider.browse(),
+        future: _browseFuture,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final items = snapshot.data!;
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.cloud_off_outlined, size: 52),
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorText(snapshot.error),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: _retry,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('إعادة المحاولة'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final items = snapshot.data ?? const <Series>[];
           final sections = <_HomeSection>[
             _HomeSection(
               'مسلسلات عربية',
@@ -157,9 +221,9 @@ class HomeScreen extends StatelessWidget {
           ];
 
           return AnimatedBuilder(
-            animation: libraryStore,
+            animation: widget.libraryStore,
             builder: (context, _) {
-              final continueWatching = libraryStore.continueWatching;
+              final continueWatching = widget.libraryStore.continueWatching;
 
               return ListView(
                 padding: const EdgeInsets.all(16),
