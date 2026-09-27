@@ -1,5 +1,13 @@
 # What's New
 
+## 0.5.0+5
+
+- Favorites now persist after closing and reopening the app.
+- Watch history is stored locally and restored at startup.
+- Episode playback progress is persisted locally.
+- Continue Watching survives app restarts.
+- Watch history is capped at the latest 100 series.
+
 ## 0.4.0+4
 
 - Swipe on the left side of the player to adjust app brightness.

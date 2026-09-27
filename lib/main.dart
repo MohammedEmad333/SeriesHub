@@ -1,20 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/library/library_store.dart';
 import 'core/providers/mock_series_provider.dart';
 import 'features/home/presentation/home_screen.dart';
 
-void main() {
-  runApp(const SeriesHubApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final preferences = await SharedPreferences.getInstance();
+  final libraryStore = LibraryStore(preferences);
+  await libraryStore.load();
+
+  runApp(SeriesHubApp(libraryStore: libraryStore));
 }
 
 class SeriesHubApp extends StatelessWidget {
-  const SeriesHubApp({super.key});
+  const SeriesHubApp({
+    super.key,
+    required this.libraryStore,
+  });
+
+  final LibraryStore libraryStore;
 
   @override
   Widget build(BuildContext context) {
     final provider = MockSeriesProvider();
-    final libraryStore = LibraryStore();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
