@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
 import '../../../core/providers/provider_registry.dart';
+import '../../../core/providers/remote_provider_repository.dart';
 import '../../../core/providers/series_provider.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../library/presentation/library_screen.dart';
@@ -50,6 +51,11 @@ class _AppShellState extends State<AppShell> {
       HomeScreen(
         provider: provider,
         availableProviders: widget.registry.all,
+        providerMetadata: {
+          for (final item in widget.registry.all)
+            if (widget.registry.metadataFor(item.id) != null)
+              item.id: widget.registry.metadataFor(item.id)!,
+        },
         onProviderSelected: _selectProvider,
         libraryStore: widget.libraryStore,
         onSearchRequested: () => _selectTab(1),
