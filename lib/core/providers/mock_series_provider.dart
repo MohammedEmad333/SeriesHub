@@ -20,6 +20,18 @@ class MockSeriesProvider implements SeriesProvider {
       language: SeriesLanguage.arabic,
       year: 2026,
       rating: 8.2,
+      country: 'فلسطين',
+      genres: ['دراما', 'اجتماعي'],
+    ),
+    Series(
+      id: 'arabic-2',
+      title: 'حكايات الشام',
+      overview: 'عمل عربي تجريبي بطابع تاريخي.',
+      language: SeriesLanguage.arabic,
+      year: 2025,
+      rating: 7.9,
+      country: 'سوريا',
+      genres: ['تاريخي', 'دراما'],
     ),
     Series(
       id: 'sub-1',
@@ -28,6 +40,18 @@ class MockSeriesProvider implements SeriesProvider {
       language: SeriesLanguage.subtitled,
       year: 2025,
       rating: 7.8,
+      country: 'تركيا',
+      genres: ['تشويق', 'دراما'],
+    ),
+    Series(
+      id: 'sub-2',
+      title: 'ما وراء الحدود',
+      overview: 'مسلسل مترجم تجريبي بطابع غموض.',
+      language: SeriesLanguage.subtitled,
+      year: 2024,
+      rating: 8.4,
+      country: 'كوريا الجنوبية',
+      genres: ['غموض', 'تشويق'],
     ),
     Series(
       id: 'dub-1',
@@ -36,6 +60,18 @@ class MockSeriesProvider implements SeriesProvider {
       language: SeriesLanguage.dubbed,
       year: 2024,
       rating: 8.0,
+      country: 'تركيا',
+      genres: ['أكشن', 'مغامرة'],
+    ),
+    Series(
+      id: 'dub-2',
+      title: 'مدينة الأسرار',
+      overview: 'مسلسل مدبلج تجريبي لعشاق الغموض.',
+      language: SeriesLanguage.dubbed,
+      year: 2023,
+      rating: 7.6,
+      country: 'إسبانيا',
+      genres: ['غموض', 'جريمة'],
     ),
   ];
 
@@ -46,8 +82,17 @@ class MockSeriesProvider implements SeriesProvider {
   Future<List<Series>> search(String query) async {
     final normalized = query.trim().toLowerCase();
     if (normalized.isEmpty) return _series;
+
     return _series
-        .where((item) => item.title.toLowerCase().contains(normalized))
+        .where(
+          (item) =>
+              item.title.toLowerCase().contains(normalized) ||
+              item.overview.toLowerCase().contains(normalized) ||
+              item.genres.any(
+                (genre) => genre.toLowerCase().contains(normalized),
+              ) ||
+              (item.country?.toLowerCase().contains(normalized) ?? false),
+        )
         .toList(growable: false);
   }
 
@@ -64,19 +109,29 @@ class MockSeriesProvider implements SeriesProvider {
           title: 'الموسم الأول',
           episodeCount: 8,
         ),
+        Season(
+          id: '$seriesId-s2',
+          seriesId: seriesId,
+          number: 2,
+          title: 'الموسم الثاني',
+          episodeCount: 6,
+        ),
       ];
 
   @override
-  Future<List<Episode>> getEpisodes(String seasonId) async => List.generate(
-        8,
-        (index) => Episode(
-          id: '$seasonId-e${index + 1}',
-          seasonId: seasonId,
-          number: index + 1,
-          title: 'الحلقة ${index + 1}',
-          duration: const Duration(minutes: 45),
-        ),
-      );
+  Future<List<Episode>> getEpisodes(String seasonId) async {
+    final count = seasonId.endsWith('-s2') ? 6 : 8;
+    return List.generate(
+      count,
+      (index) => Episode(
+        id: '$seasonId-e${index + 1}',
+        seasonId: seasonId,
+        number: index + 1,
+        title: 'الحلقة ${index + 1}',
+        duration: const Duration(minutes: 45),
+      ),
+    );
+  }
 
   @override
   Future<List<PlaybackSource>> getPlaybackSources(String episodeId) async => [

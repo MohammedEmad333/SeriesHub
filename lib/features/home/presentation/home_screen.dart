@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
+import '../../../core/library/watch_progress.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/series_provider.dart';
 import '../../library/presentation/library_screen.dart';
+import '../../player/presentation/player_screen.dart';
 import '../../search/presentation/search_screen.dart';
 import '../../series/presentation/series_details_screen.dart';
 
@@ -17,6 +19,52 @@ class HomeScreen extends StatelessWidget {
   final SeriesProvider provider;
   final LibraryStore libraryStore;
 
+  Future<void> _resumeWatching(
+    BuildContext context,
+    WatchProgress progress,
+  ) async {
+    final episodes = await provider.getEpisodes(progress.episode.seasonId);
+    final sources = await provider.getPlaybackSources(progress.episode.id);
+
+    if (!context.mounted) return;
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PlayerScreen(
+          series: progress.series,
+          episode: progress.episode,
+          episodes: episodes,
+          sources: sources,
+          provider: provider,
+          libraryStore: libraryStore,
+        ),
+      ),
+    );
+  }
+
+  void _openSearch(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SearchScreen(
+          provider: provider,
+          libraryStore: libraryStore,
+        ),
+      ),
+    );
+  }
+
+  void _openDetails(BuildContext context, Series series) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SeriesDetailsScreen(
+          series: series,
+          provider: provider,
+          libraryStore: libraryStore,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,13 +73,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: 'بحث',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => SearchScreen(provider: provider),
-                ),
-              );
-            },
+            onPressed: () => _openSearch(context),
             icon: const Icon(Icons.search),
           ),
         ],
@@ -72,6 +114,7 @@ class HomeScreen extends StatelessWidget {
             animation: libraryStore,
             builder: (context, _) {
               final continueWatching = libraryStore.continueWatching;
+
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -88,33 +131,53 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 110,
+                      height: 124,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: continueWatching.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           final progress = continueWatching[index];
+
                           return SizedBox(
-                            width: 220,
+                            width: 230,
                             child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      progress.series.title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(progress.episode.title),
-                                    const Spacer(),
-                                    LinearProgressIndicator(
-                                      value: progress.fraction,
-                                    ),
-                                  ],
+                              clipBehavior: Clip.antiAlias,
+                              child: InkWell(
+                                onTap: () => _resumeWatching(
+                                  context,
+                                  progress,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        progress.series.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(progress.episode.title),
+                                      const Spacer(),
+                                      LinearProgressIndicator(
+                                        value: progress.fraction,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        '${(progress.fraction * 100).round()}%',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -125,49 +188,35 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                   ],
                   for (final section in sections) ...[
-                    Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(section.icon),
-                      const SizedBox(width: 8),
-                      Text(
-                        section.title,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 190,
-                    child: section.items.isEmpty
-                        ? const Center(child: Text('لا توجد عناصر بعد'))
-                        : ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: section.items.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 12),
-                            itemBuilder: (context, itemIndex) {
-                              final item = section.items[itemIndex];
-                              return _SeriesCard(
-                                series: item,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => SeriesDetailsScreen(
-                                        series: item,
-                                        provider: provider,
-                                        libraryStore: libraryStore,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                  ),
-                ],
+                    Row(
+                      children: [
+                        Icon(section.icon),
+                        const SizedBox(width: 8),
+                        Text(
+                          section.title,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 190,
+                      child: section.items.isEmpty
+                          ? const Center(child: Text('لا توجد عناصر بعد'))
+                          : ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: section.items.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 12),
+                              itemBuilder: (context, itemIndex) {
+                                final item = section.items[itemIndex];
+
+                                return _SeriesCard(
+                                  series: item,
+                                  onTap: () => _openDetails(context, item),
+                                );
+                              },
+                            ),
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -181,11 +230,7 @@ class HomeScreen extends StatelessWidget {
         selectedIndex: 0,
         onDestinationSelected: (index) {
           if (index == 1) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => SearchScreen(provider: provider),
-              ),
-            );
+            _openSearch(context);
           } else if (index == 2) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -212,13 +257,19 @@ class HomeScreen extends StatelessWidget {
             selectedIcon: Icon(Icons.home),
             label: 'الرئيسية',
           ),
-          NavigationDestination(icon: Icon(Icons.search), label: 'البحث'),
+          NavigationDestination(
+            icon: Icon(Icons.search),
+            label: 'البحث',
+          ),
           NavigationDestination(
             icon: Icon(Icons.favorite_border),
             selectedIcon: Icon(Icons.favorite),
             label: 'المفضلة',
           ),
-          NavigationDestination(icon: Icon(Icons.history), label: 'السجل'),
+          NavigationDestination(
+            icon: Icon(Icons.history),
+            label: 'السجل',
+          ),
         ],
       ),
     );
@@ -226,7 +277,10 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _SeriesCard extends StatelessWidget {
-  const _SeriesCard({required this.series, required this.onTap});
+  const _SeriesCard({
+    required this.series,
+    required this.onTap,
+  });
 
   final Series series;
   final VoidCallback onTap;
@@ -234,7 +288,7 @@ class _SeriesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 130,
+      width: 136,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
@@ -257,11 +311,14 @@ class _SeriesCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            if (series.year != null)
-              Text(
-                '${series.year}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+            Text(
+              [
+                if (series.year != null) '${series.year}',
+                if (series.rating != null)
+                  '★ ${series.rating!.toStringAsFixed(1)}',
+              ].join(' · '),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),
@@ -270,7 +327,11 @@ class _SeriesCard extends StatelessWidget {
 }
 
 class _HomeSection {
-  const _HomeSection(this.title, this.icon, this.items);
+  const _HomeSection(
+    this.title,
+    this.icon,
+    this.items,
+  );
 
   final String title;
   final IconData icon;
