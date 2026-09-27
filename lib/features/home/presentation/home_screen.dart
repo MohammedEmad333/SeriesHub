@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/library/library_store.dart';
 import '../../../core/library/watch_progress.dart';
 import '../../../core/models/series.dart';
+import '../../../core/providers/remote_provider_repository.dart';
 import '../../../core/providers/series_provider.dart';
 import '../../player/presentation/playback_launcher.dart';
 import '../../series/presentation/series_details_screen.dart';
@@ -12,6 +13,7 @@ class HomeScreen extends StatelessWidget {
     super.key,
     required this.provider,
     required this.availableProviders,
+    required this.providerMetadata,
     required this.onProviderSelected,
     required this.libraryStore,
     required this.onSearchRequested,
@@ -19,6 +21,7 @@ class HomeScreen extends StatelessWidget {
 
   final SeriesProvider provider;
   final List<SeriesProvider> availableProviders;
+  final Map<String, RemoteProviderDescriptor> providerMetadata;
   final ValueChanged<String> onProviderSelected;
   final LibraryStore libraryStore;
   final VoidCallback onSearchRequested;
@@ -66,6 +69,21 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  static String _providerLabel(
+    SeriesProvider provider,
+    RemoteProviderDescriptor? metadata,
+  ) {
+    if (metadata == null) return provider.name;
+
+    return switch (metadata.status) {
+      'working' when metadata.playback => '${provider.name} · تشغيل',
+      'metadata_only' => '${provider.name} · بيانات فقط',
+      'broken' => '${provider.name} · متوقف',
+      'disabled' => '${provider.name} · معطل',
+      _ => provider.name,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +101,12 @@ class HomeScreen extends StatelessWidget {
                   CheckedPopupMenuItem<String>(
                     value: item.id,
                     checked: item.id == provider.id,
-                    child: Text(item.name),
+                    child: Text(
+                      _providerLabel(
+                        item,
+                        providerMetadata[item.id],
+                      ),
+                    ),
                   ),
               ],
             ),

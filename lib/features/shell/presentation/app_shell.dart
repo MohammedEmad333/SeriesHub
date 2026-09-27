@@ -50,6 +50,11 @@ class _AppShellState extends State<AppShell> {
       HomeScreen(
         provider: provider,
         availableProviders: widget.registry.all,
+        providerMetadata: {
+          for (final item in widget.registry.all)
+            if (widget.registry.metadataFor(item.id) != null)
+              item.id: widget.registry.metadataFor(item.id)!,
+        },
         onProviderSelected: _selectProvider,
         libraryStore: widget.libraryStore,
         onSearchRequested: () => _selectTab(1),

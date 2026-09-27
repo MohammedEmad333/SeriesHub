@@ -7,6 +7,8 @@ import 'core/models/series.dart';
 import 'core/providers/external_series_provider.dart';
 import 'core/providers/mock_series_provider.dart';
 import 'core/providers/provider_registry.dart';
+import 'core/providers/remote_provider_repository.dart';
+import 'core/providers/series_provider.dart';
 import 'features/shell/presentation/app_shell.dart';
 
 Future<void> main() async {
@@ -16,15 +18,41 @@ Future<void> main() async {
   final libraryStore = LibraryStore(preferences);
   await libraryStore.load();
 
-  final registry = ProviderRegistry([
-    ExternalSeriesProvider(
+  final builtIns = <String, SeriesProvider>{
+    'official-youtube': ExternalSeriesProvider(
       OfficialYouTubeProvider(),
       language: SeriesLanguage.subtitled,
     ),
-    ExternalSeriesProvider(RoyaProvider()),
-    ExternalSeriesProvider(WatanFlixProvider()),
-    MockSeriesProvider(),
-  ]);
+    'roya': ExternalSeriesProvider(RoyaProvider()),
+    'watanflix': ExternalSeriesProvider(WatanFlixProvider()),
+  };
+
+  final remoteIndex = await RemoteProviderRepository().load();
+  final providers = <SeriesProvider>[];
+  final metadata = <String, RemoteProviderDescriptor>{};
+
+  if (remoteIndex == null) {
+    providers.addAll(builtIns.values);
+  } else {
+    for (final descriptor in remoteIndex.providers) {
+      metadata[descriptor.id] = descriptor;
+      if (!descriptor.isUsable) continue;
+
+      final provider = builtIns[descriptor.id];
+      if (provider != null) providers.add(provider);
+    }
+
+    if (providers.isEmpty) {
+      providers.addAll(builtIns.values);
+    }
+  }
+
+  providers.add(MockSeriesProvider());
+
+  final registry = ProviderRegistry(
+    providers,
+    metadata: metadata,
+  );
 
   runApp(
     SeriesHubApp(
