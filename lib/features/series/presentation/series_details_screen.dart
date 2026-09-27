@@ -152,7 +152,10 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                               : '${episode.duration!.inMinutes} دقيقة',
                         ),
                         trailing: const Icon(Icons.play_arrow),
-                        onTap: () => _playEpisode(episode),
+                        onTap: () => _playEpisode(
+                          episode,
+                          snapshot.data!,
+                        ),
                       ),
                   ],
                 );
