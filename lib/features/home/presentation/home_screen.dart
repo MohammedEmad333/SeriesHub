@@ -6,7 +6,7 @@ import '../../../core/library/library_store.dart';
 import '../../../core/library/watch_progress.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/remote_provider_repository.dart';
-import '../../../core/providers/series_widget.provider.dart';
+import '../../../core/providers/series_provider.dart';
 import '../../player/presentation/playback_launcher.dart';
 import '../../series/presentation/series_details_screen.dart';
 
@@ -14,28 +14,28 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.provider,
-    required this.widget.availableProviders,
-    required this.widget.providerMetadata,
-    required this.widget.onProviderSelected,
-    required this.widget.onManageSourcesRequested,
-    required this.widget.libraryStore,
-    required this.widget.onSearchRequested,
+    required this.availableProviders,
+    required this.providerMetadata,
+    required this.onProviderSelected,
+    required this.onManageSourcesRequested,
+    required this.libraryStore,
+    required this.onSearchRequested,
   });
 
   final SeriesProvider provider;
-  final List<SeriesProvider> widget.availableProviders;
-  final Map<String, RemoteProviderDescriptor> widget.providerMetadata;
-  final ValueChanged<String> widget.onProviderSelected;
-  final VoidCallback widget.onManageSourcesRequested;
-  final LibraryStore widget.libraryStore;
-  final VoidCallback widget.onSearchRequested;
+  final List<SeriesProvider> availableProviders;
+  final Map<String, RemoteProviderDescriptor> providerMetadata;
+  final ValueChanged<String> onProviderSelected;
+  final VoidCallback onManageSourcesRequested;
+  final LibraryStore libraryStore;
+  final VoidCallback onSearchRequested;
 
   Future<void> _resumeWatching(
     BuildContext context,
     WatchProgress progress,
   ) async {
-    final episodes = await widget.provider.getEpisodes(progress.episode.seasonId);
-    final sources = await widget.provider.getPlaybackSources(progress.episode.id);
+    final episodes = await provider.getEpisodes(progress.episode.seasonId);
+    final sources = await provider.getPlaybackSources(progress.episode.id);
 
     if (!context.mounted) return;
     if (sources.isEmpty) {
@@ -55,7 +55,7 @@ class HomeScreen extends StatefulWidget {
           episodes: episodes,
           sources: sources,
           provider: provider,
-          widget.libraryStore: widget.libraryStore,
+          libraryStore: libraryStore,
         ),
       ),
     );
@@ -67,7 +67,7 @@ class HomeScreen extends StatefulWidget {
         builder: (_) => SeriesDetailsScreen(
           series: series,
           provider: provider,
-          widget.libraryStore: widget.libraryStore,
+          libraryStore: libraryStore,
         ),
       ),
     );
@@ -77,14 +77,14 @@ class HomeScreen extends StatefulWidget {
     SeriesProvider provider,
     RemoteProviderDescriptor? metadata,
   ) {
-    if (metadata == null) return widget.provider.name;
+    if (metadata == null) return provider.name;
 
     return switch (metadata.status) {
-      'working' when metadata.playback => '${widget.provider.name} · تشغيل',
-      'metadata_only' => '${widget.provider.name} · بيانات فقط',
-      'broken' => '${widget.provider.name} · متوقف',
-      'disabled' => '${widget.provider.name} · معطل',
-      _ => widget.provider.name,
+      'working' when metadata.playback => '${provider.name} · تشغيل',
+      'metadata_only' => '${provider.name} · بيانات فقط',
+      'broken' => '${provider.name} · متوقف',
+      'disabled' => '${provider.name} · معطل',
+      _ => provider.name,
     };
   }
 
@@ -105,13 +105,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didUpdateWidget(covariant HomeScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.widget.provider.id != widget.widget.provider.id) {
+    if (oldWidget.provider.id != widget.provider.id) {
       _reload();
     }
   }
 
   void _reload() {
-    _browseFuture = widget.widget.provider.browse().timeout(_browseTimeout);
+    _browseFuture = widget.provider.browse().timeout(_browseTimeout);
   }
 
   void _retry() {
@@ -122,14 +122,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (error is TimeoutException) {
       return 'انتهت مهلة الاتصال بالمصدر. جرّب مرة أخرى أو اختر مصدرًا آخر.';
     }
-    return 'تعذر تحميل محتوى ${widget.widget.provider.name}. قد يكون الموقع محجوبًا أو تغيّرت بنيته.';
+    return 'تعذر تحميل محتوى ${widget.provider.name}. قد يكون الموقع محجوبًا أو تغيّرت بنيته.';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SeriesHub · ${widget.provider.name}'),
+        title: Text('SeriesHub · ${provider.name}'),
         actions: [
           if (widget.availableProviders.length > 1)
             PopupMenuButton<String>(
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Card(
                               clipBehavior: Clip.antiAlias,
                               child: InkWell(
-                                onTap: () => _resumeWatching(
+                                onTap: () => widget._resumeWatching(
                                   context,
                                   progress,
                                 ),
@@ -323,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 return _SeriesCard(
                                   series: item,
-                                  onTap: () => _openDetails(context, item),
+                                  onTap: () => widget._openDetails(context, item),
                                 );
                               },
                             ),
