@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/library/library_store.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/series_provider.dart';
+import '../../library/presentation/library_screen.dart';
 import '../../search/presentation/search_screen.dart';
 import '../../series/presentation/series_details_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.provider});
+  const HomeScreen({
+    super.key,
+    required this.provider,
+    required this.libraryStore,
+  });
 
   final SeriesProvider provider;
+  final LibraryStore libraryStore;
 
   @override
   Widget build(BuildContext context) {
@@ -41,17 +48,23 @@ class HomeScreen extends StatelessWidget {
             _HomeSection(
               'مسلسلات عربية',
               Icons.language,
-              items.where((item) => item.language == SeriesLanguage.arabic).toList(),
+              items
+                  .where((item) => item.language == SeriesLanguage.arabic)
+                  .toList(),
             ),
             _HomeSection(
               'مترجمة',
               Icons.subtitles,
-              items.where((item) => item.language == SeriesLanguage.subtitled).toList(),
+              items
+                  .where((item) => item.language == SeriesLanguage.subtitled)
+                  .toList(),
             ),
             _HomeSection(
               'مدبلجة',
               Icons.record_voice_over,
-              items.where((item) => item.language == SeriesLanguage.dubbed).toList(),
+              items
+                  .where((item) => item.language == SeriesLanguage.dubbed)
+                  .toList(),
             ),
           ];
 
@@ -82,7 +95,8 @@ class HomeScreen extends StatelessWidget {
                         : ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: section.items.length,
-                            separatorBuilder: (_, __) => const SizedBox(width: 12),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 12),
                             itemBuilder: (context, itemIndex) {
                               final item = section.items[itemIndex];
                               return _SeriesCard(
@@ -93,6 +107,7 @@ class HomeScreen extends StatelessWidget {
                                       builder: (_) => SeriesDetailsScreen(
                                         series: item,
                                         provider: provider,
+                                        libraryStore: libraryStore,
                                       ),
                                     ),
                                   );
@@ -114,6 +129,24 @@ class HomeScreen extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => SearchScreen(provider: provider),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => LibraryScreen(
+                  store: libraryStore,
+                  mode: LibraryMode.favorites,
+                ),
+              ),
+            );
+          } else if (index == 3) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => LibraryScreen(
+                  store: libraryStore,
+                  mode: LibraryMode.history,
+                ),
               ),
             );
           }
