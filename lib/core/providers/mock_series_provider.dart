@@ -1,4 +1,5 @@
 import '../models/episode.dart';
+import '../models/media_track.dart';
 import '../models/playback_source.dart';
 import '../models/season.dart';
 import '../models/series.dart';
@@ -88,6 +89,39 @@ class MockSeriesProvider implements SeriesProvider {
           url: 'https://example.com/video-1080p.m3u8',
           label: '1080p',
           mimeType: 'application/x-mpegURL',
+        ),
+      ];
+
+  @override
+  Future<List<MediaTrack>> getAudioTracks(String episodeId) async => const [
+        MediaTrack(
+          id: 'audio-ar',
+          label: 'العربية',
+          language: 'ar',
+          type: MediaTrackType.audio,
+        ),
+        MediaTrack(
+          id: 'audio-original',
+          label: 'الصوت الأصلي',
+          language: 'original',
+          type: MediaTrackType.audio,
+        ),
+      ];
+
+  @override
+  Future<List<MediaTrack>> getSubtitleTracks(String episodeId) async => const [
+        MediaTrack(
+          id: 'sub-ar',
+          label: 'العربية',
+          language: 'ar',
+          type: MediaTrackType.subtitle,
+          url: 'https://example.com/subtitles-ar.vtt',
+        ),
+        MediaTrack(
+          id: 'sub-off',
+          label: 'بدون ترجمة',
+          language: 'off',
+          type: MediaTrackType.subtitle,
         ),
       ];
 }
