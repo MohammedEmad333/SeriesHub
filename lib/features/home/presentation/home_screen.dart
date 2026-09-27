@@ -68,13 +68,64 @@ class HomeScreen extends StatelessWidget {
             ),
           ];
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: sections.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 24),
-            itemBuilder: (context, index) {
-              final section = sections[index];
-              return Column(
+          return AnimatedBuilder(
+            animation: libraryStore,
+            builder: (context, _) {
+              final continueWatching = libraryStore.continueWatching;
+              return ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  if (continueWatching.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        const Icon(Icons.play_circle_outline),
+                        const SizedBox(width: 8),
+                        Text(
+                          'أكمل المشاهدة',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 110,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: continueWatching.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final progress = continueWatching[index];
+                          return SizedBox(
+                            width: 220,
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      progress.series.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(progress.episode.title),
+                                    const Spacer(),
+                                    LinearProgressIndicator(
+                                      value: progress.fraction,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  for (final section in sections) ...[
+                    Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -116,6 +167,10 @@ class HomeScreen extends StatelessWidget {
                             },
                           ),
                   ),
+                ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ],
               );
             },
