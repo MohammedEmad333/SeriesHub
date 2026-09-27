@@ -85,7 +85,7 @@ class RemoteProviderRepository {
         return null;
       }
 
-      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes, allowMalformed: true));
       if (decoded is! Map<String, dynamic>) return null;
 
       return RemoteProviderIndex.fromJson(decoded);
