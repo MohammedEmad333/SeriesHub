@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: item.id,
                     checked: item.id == widget.provider.id,
                     child: Text(
-                      _providerLabel(
+                      HomeScreen._providerLabel(
                         item,
                         widget.providerMetadata[item.id],
                       ),
