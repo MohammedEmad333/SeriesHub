@@ -1,5 +1,14 @@
 # What's New
 
+## 0.7.0+7
+
+- Bottom navigation is now a persistent app shell instead of stacking screens.
+- Home, Search, Favorites, and History keep their tab position.
+- Favorites and History items now open series details.
+- Library rows now show richer metadata.
+- Added automated tests for favorites, history, and watch progress persistence.
+- CI now runs flutter test on every pull request.
+
 ## 0.6.0+6
 
 - Advanced search filters for language, country, genre, and year.
