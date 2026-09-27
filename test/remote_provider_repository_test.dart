@@ -37,10 +37,8 @@ void main() {
 
     expect(await repository.load(), isNull);
   });
-}
 
-
-test('still accepts legacy object indexes', () {
+  test('still accepts legacy object indexes', () {
   final index = RemoteProviderIndex.fromDecoded({
     'version': 1,
     'providers': [
@@ -54,5 +52,6 @@ test('still accepts legacy object indexes', () {
     ],
   });
 
-  expect(index.providers.single.id, 'legacy');
-});
+    expect(index.providers.single.id, 'legacy');
+  });
+}
