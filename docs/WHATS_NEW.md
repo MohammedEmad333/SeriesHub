@@ -1,5 +1,16 @@
 # What's New
 
+## 0.11.0+11
+
+- Added a remote provider repository loader backed by SeriesHub-Providers.
+- Provider visibility, order, health status, and playback capability now come from index.min.json.
+- Broken or disabled providers can be hidden remotely without releasing a new APK.
+- Unknown remote provider IDs are ignored unless their implementation is already built into the app.
+- Added automatic fallback to the built-in provider list when the remote repository is unreachable.
+- Source selector now shows whether a provider supports playback or metadata only.
+- Added tests for remote repository loading and failure fallback.
+
+
 ## 0.10.0+10
 
 - Added an Official YouTube source backed by curated official channels only.
