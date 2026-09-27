@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'core/providers/mock_series_provider.dart';
+import 'features/home/presentation/home_screen.dart';
+
 void main() {
   runApp(const SeriesHubApp());
 }
@@ -9,6 +12,8 @@ class SeriesHubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = MockSeriesProvider();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SeriesHub',
@@ -18,25 +23,9 @@ class SeriesHubApp extends StatelessWidget {
         brightness: Brightness.dark,
         colorSchemeSeed: const Color(0xFFE65100),
       ),
-      home: const Directionality(
+      home: Directionality(
         textDirection: TextDirection.rtl,
-        child: HomeScreen(),
-      ),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('SeriesHub'),
-      ),
-      body: const Center(
-        child: Text('المسلسلات العربية والمترجمة والمدبلجة'),
+        child: HomeScreen(provider: provider),
       ),
     );
   }
