@@ -18,11 +18,21 @@ jobs:
 
       - name: Generate Android project
         run: |
-          flutter create .             --platforms=android             --org com.mohammedemad333             --project-name serieshub
+          flutter create . --platforms=android --org com.mohammedemad333 --project-name serieshub
           rm -f test/widget_test.dart
+          python3 - <<'PY'
+          from pathlib import Path
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          text = manifest.read_text()
+          text = text.replace('android:label="serieshub"', 'android:label="SeriesHub"')
+          manifest.write_text(text)
+          PY
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons
 
       - name: Run tests
         run: flutter test
