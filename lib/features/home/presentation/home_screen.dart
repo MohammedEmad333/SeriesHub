@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SeriesHub · ${provider.name}'),
+        title: Text('SeriesHub · ${widget.provider.name}'),
         actions: [
           if (widget.availableProviders.length > 1)
             PopupMenuButton<String>(
