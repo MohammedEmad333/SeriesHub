@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/library/library_store.dart';
 import '../../../core/models/episode.dart';
 import '../../../core/models/season.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/series_provider.dart';
+import '../../player/presentation/player_screen.dart';
 
 class SeriesDetailsScreen extends StatefulWidget {
   const SeriesDetailsScreen({
     super.key,
     required this.series,
     required this.provider,
+    required this.libraryStore,
   });
 
   final Series series;
   final SeriesProvider provider;
+  final LibraryStore libraryStore;
 
   @override
   State<SeriesDetailsScreen> createState() => _SeriesDetailsScreenState();
@@ -25,6 +29,12 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
   String? _selectedSeasonId;
   Future<List<Episode>>? _episodes;
 
+  @override
+  void initState() {
+    super.initState();
+    widget.libraryStore.addToHistory(widget.series);
+  }
+
   void _selectSeason(Season season) {
     setState(() {
       _selectedSeasonId = season.id;
@@ -32,11 +42,41 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
     });
   }
 
+  Future<void> _playEpisode(Episode episode) async {
+    final sources = await widget.provider.getPlaybackSources(episode.id);
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PlayerScreen(
+          episode: episode,
+          sources: sources,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final series = widget.series;
     return Scaffold(
-      appBar: AppBar(title: Text(series.title)),
+      appBar: AppBar(
+        title: Text(series.title),
+        actions: [
+          AnimatedBuilder(
+            animation: widget.libraryStore,
+            builder: (context, _) {
+              final isFavorite = widget.libraryStore.isFavorite(series.id);
+              return IconButton(
+                tooltip: isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
+                onPressed: () => widget.libraryStore.toggleFavorite(series),
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -110,6 +150,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                               : '${episode.duration!.inMinutes} دقيقة',
                         ),
                         trailing: const Icon(Icons.play_arrow),
+                        onTap: () => _playEpisode(episode),
                       ),
                   ],
                 );
