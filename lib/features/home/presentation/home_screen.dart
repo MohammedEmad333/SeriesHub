@@ -4,7 +4,7 @@ import '../../../core/library/library_store.dart';
 import '../../../core/library/watch_progress.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/series_provider.dart';
-import '../../player/presentation/player_screen.dart';
+import '../../player/presentation/playback_launcher.dart';
 import '../../series/presentation/series_details_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -42,7 +42,7 @@ class HomeScreen extends StatelessWidget {
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PlayerScreen(
+        builder: (_) => buildPlaybackScreen(
           series: progress.series,
           episode: progress.episode,
           episodes: episodes,

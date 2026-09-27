@@ -3,6 +3,7 @@ import 'package:serieshub_providers/serieshub_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/library/library_store.dart';
+import 'core/models/series.dart';
 import 'core/providers/external_series_provider.dart';
 import 'core/providers/mock_series_provider.dart';
 import 'core/providers/provider_registry.dart';
@@ -16,6 +17,11 @@ Future<void> main() async {
   await libraryStore.load();
 
   final registry = ProviderRegistry([
+    ExternalSeriesProvider(
+      OfficialYouTubeProvider(),
+      language: SeriesLanguage.subtitled,
+    ),
+    ExternalSeriesProvider(RoyaProvider()),
     ExternalSeriesProvider(WatanFlixProvider()),
     MockSeriesProvider(),
   ]);

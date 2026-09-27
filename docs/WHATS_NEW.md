@@ -1,5 +1,16 @@
 # What's New
 
+## 0.10.0+10
+
+- Added an Official YouTube source backed by curated official channels only.
+- Added full public MangoTV Arabic episodes for the first playable test series.
+- Added availability checks so private, deleted, or unavailable videos are not exposed.
+- Added inline YouTube playback using the official IFrame player.
+- Added automatic playback routing between YouTube and direct video sources.
+- Added Roya TV to the app source selector.
+- Made the Official YouTube source the default source for immediate playback testing.
+
+
 ## 0.9.0+9
 
 - Added the external SeriesHub Providers package pinned to a known commit.
