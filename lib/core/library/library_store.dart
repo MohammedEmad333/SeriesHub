@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/series.dart';
 
-class LibraryStore {
+class LibraryStore extends ChangeNotifier {
   final List<Series> _favorites = [];
   final List<Series> _history = [];
 
@@ -15,10 +17,12 @@ class LibraryStore {
     } else {
       _favorites.add(series);
     }
+    notifyListeners();
   }
 
   void addToHistory(Series series) {
     _history.removeWhere((item) => item.id == series.id);
     _history.insert(0, series);
+    notifyListeners();
   }
 }
