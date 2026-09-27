@@ -41,9 +41,6 @@ Future<void> main() async {
       }
     }
 
-    if (activeIds.isEmpty) {
-      activeIds.addAll(builtIns.keys);
-    }
   }
 
   final registry = ProviderRegistry(
