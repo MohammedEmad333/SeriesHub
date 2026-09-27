@@ -56,6 +56,15 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
     final sources = await widget.provider.getPlaybackSources(episode.id);
     if (!mounted) return;
 
+    if (sources.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('هذا المصدر لا يوفر رابط تشغيل مباشر بعد.'),
+        ),
+      );
+      return;
+    }
+
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PlayerScreen(
