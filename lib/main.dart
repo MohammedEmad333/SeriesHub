@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/library/library_store.dart';
 import 'core/providers/mock_series_provider.dart';
 import 'features/home/presentation/home_screen.dart';
 
@@ -13,6 +14,7 @@ class SeriesHubApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = MockSeriesProvider();
+    final libraryStore = LibraryStore();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -25,7 +27,10 @@ class SeriesHubApp extends StatelessWidget {
       ),
       home: Directionality(
         textDirection: TextDirection.rtl,
-        child: HomeScreen(provider: provider),
+        child: HomeScreen(
+          provider: provider,
+          libraryStore: libraryStore,
+        ),
       ),
     );
   }
