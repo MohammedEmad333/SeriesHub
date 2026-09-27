@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
@@ -8,7 +10,7 @@ import '../../../core/providers/series_provider.dart';
 import '../../player/presentation/playback_launcher.dart';
 import '../../series/presentation/series_details_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.provider,
@@ -87,26 +89,63 @@ class HomeScreen extends StatelessWidget {
   }
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  static const _browseTimeout = Duration(seconds: 20);
+  late Future<List<Series>> _browseFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.provider.id != widget.provider.id) {
+      _reload();
+    }
+  }
+
+  void _reload() {
+    _browseFuture = widget.provider.browse().timeout(_browseTimeout);
+  }
+
+  void _retry() {
+    setState(_reload);
+  }
+
+  String _errorText(Object? error) {
+    if (error is TimeoutException) {
+      return 'انتهت مهلة الاتصال بالمصدر. جرّب مرة أخرى أو اختر مصدرًا آخر.';
+    }
+    return 'تعذر تحميل محتوى ${widget.provider.name}. قد يكون الموقع محجوبًا أو تغيّرت بنيته.';
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SeriesHub · ${provider.name}'),
+        title: Text('SeriesHub · ${widget.provider.name}'),
         actions: [
-          if (availableProviders.length > 1)
+          if (widget.availableProviders.length > 1)
             PopupMenuButton<String>(
               tooltip: 'المصدر',
-              initialValue: provider.id,
+              initialValue: widget.provider.id,
               icon: const Icon(Icons.source_outlined),
-              onSelected: onProviderSelected,
+              onSelected: widget.onProviderSelected,
               itemBuilder: (context) => [
-                for (final item in availableProviders)
+                for (final item in widget.availableProviders)
                   CheckedPopupMenuItem<String>(
                     value: item.id,
-                    checked: item.id == provider.id,
+                    checked: item.id == widget.provider.id,
                     child: Text(
-                      _providerLabel(
+                      HomeScreen._providerLabel(
                         item,
-                        providerMetadata[item.id],
+                        widget.providerMetadata[item.id],
                       ),
                     ),
                   ),
@@ -114,24 +153,49 @@ class HomeScreen extends StatelessWidget {
             ),
           IconButton(
             tooltip: 'إدارة المصادر',
-            onPressed: onManageSourcesRequested,
+            onPressed: widget.onManageSourcesRequested,
             icon: const Icon(Icons.tune),
           ),
           IconButton(
             tooltip: 'بحث',
-            onPressed: onSearchRequested,
+            onPressed: widget.onSearchRequested,
             icon: const Icon(Icons.search),
           ),
         ],
       ),
       body: FutureBuilder<List<Series>>(
-        future: provider.browse(),
+        future: _browseFuture,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final items = snapshot.data!;
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.cloud_off_outlined, size: 52),
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorText(snapshot.error),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: _retry,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('إعادة المحاولة'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final items = snapshot.data ?? const <Series>[];
           final sections = <_HomeSection>[
             _HomeSection(
               'مسلسلات عربية',
@@ -157,9 +221,9 @@ class HomeScreen extends StatelessWidget {
           ];
 
           return AnimatedBuilder(
-            animation: libraryStore,
+            animation: widget.libraryStore,
             builder: (context, _) {
-              final continueWatching = libraryStore.continueWatching;
+              final continueWatching = widget.libraryStore.continueWatching;
 
               return ListView(
                 padding: const EdgeInsets.all(16),
@@ -191,7 +255,7 @@ class HomeScreen extends StatelessWidget {
                             child: Card(
                               clipBehavior: Clip.antiAlias,
                               child: InkWell(
-                                onTap: () => _resumeWatching(
+                                onTap: () => widget._resumeWatching(
                                   context,
                                   progress,
                                 ),
@@ -259,7 +323,7 @@ class HomeScreen extends StatelessWidget {
 
                                 return _SeriesCard(
                                   series: item,
-                                  onTap: () => _openDetails(context, item),
+                                  onTap: () => widget._openDetails(context, item),
                                 );
                               },
                             ),
