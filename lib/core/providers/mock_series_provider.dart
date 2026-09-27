@@ -56,7 +56,7 @@ class MockSeriesProvider implements SeriesProvider {
   @override
   Future<List<Season>> getSeasons(String seriesId) async => [
         Season(
-          id: '${seriesId}-s1',
+          id: '$seriesId-s1',
           seriesId: seriesId,
           number: 1,
           title: 'الموسم الأول',
@@ -68,7 +68,7 @@ class MockSeriesProvider implements SeriesProvider {
   Future<List<Episode>> getEpisodes(String seasonId) async => List.generate(
         8,
         (index) => Episode(
-          id: '${seasonId}-e${index + 1}',
+          id: '$seasonId-e${index + 1}',
           seasonId: seasonId,
           number: index + 1,
           title: 'الحلقة ${index + 1}',
