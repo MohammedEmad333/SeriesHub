@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
+import '../../../core/providers/provider_registry.dart';
 import '../../../core/providers/series_provider.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../library/presentation/library_screen.dart';
@@ -9,11 +10,11 @@ import '../../search/presentation/search_screen.dart';
 class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
-    required this.provider,
+    required this.registry,
     required this.libraryStore,
   });
 
-  final SeriesProvider provider;
+  final ProviderRegistry registry;
   final LibraryStore libraryStore;
 
   @override
@@ -22,31 +23,49 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+  late String _providerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _providerId = widget.registry.all.first.id;
+  }
+
+  SeriesProvider get _provider =>
+      widget.registry.byId(_providerId) ?? widget.registry.all.first;
 
   void _selectTab(int index) {
     setState(() => _index = index);
   }
 
+  void _selectProvider(String providerId) {
+    if (providerId == _providerId) return;
+    setState(() => _providerId = providerId);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final provider = _provider;
     final pages = [
       HomeScreen(
-        provider: widget.provider,
+        provider: provider,
+        availableProviders: widget.registry.all,
+        onProviderSelected: _selectProvider,
         libraryStore: widget.libraryStore,
         onSearchRequested: () => _selectTab(1),
       ),
       SearchScreen(
-        provider: widget.provider,
+        provider: provider,
         libraryStore: widget.libraryStore,
       ),
       LibraryScreen(
         store: widget.libraryStore,
-        provider: widget.provider,
+        provider: provider,
         mode: LibraryMode.favorites,
       ),
       LibraryScreen(
         store: widget.libraryStore,
-        provider: widget.provider,
+        provider: provider,
         mode: LibraryMode.history,
       ),
     ];
