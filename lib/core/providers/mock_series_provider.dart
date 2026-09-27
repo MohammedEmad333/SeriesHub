@@ -1,4 +1,5 @@
 import '../models/episode.dart';
+import '../models/playback_source.dart';
 import '../models/season.dart';
 import '../models/series.dart';
 import 'series_provider.dart';
@@ -75,4 +76,18 @@ class MockSeriesProvider implements SeriesProvider {
           duration: const Duration(minutes: 45),
         ),
       );
+
+  @override
+  Future<List<PlaybackSource>> getPlaybackSources(String episodeId) async => [
+        const PlaybackSource(
+          url: 'https://example.com/video-720p.m3u8',
+          label: '720p',
+          mimeType: 'application/x-mpegURL',
+        ),
+        const PlaybackSource(
+          url: 'https://example.com/video-1080p.m3u8',
+          label: '1080p',
+          mimeType: 'application/x-mpegURL',
+        ),
+      ];
 }
