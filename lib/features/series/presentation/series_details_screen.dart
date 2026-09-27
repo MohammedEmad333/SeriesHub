@@ -5,7 +5,7 @@ import '../../../core/models/episode.dart';
 import '../../../core/models/season.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/series_provider.dart';
-import '../../player/presentation/player_screen.dart';
+import '../../player/presentation/playback_launcher.dart';
 
 class SeriesDetailsScreen extends StatefulWidget {
   const SeriesDetailsScreen({
@@ -67,7 +67,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PlayerScreen(
+        builder: (_) => buildPlaybackScreen(
           series: widget.series,
           episode: episode,
           episodes: episodes,
