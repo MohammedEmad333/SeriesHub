@@ -120,7 +120,17 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             alignment: Alignment.center,
-            child: const Icon(Icons.movie_outlined, size: 72),
+            clipBehavior: Clip.antiAlias,
+            child: series.posterUrl == null || series.posterUrl!.isEmpty
+                ? const Icon(Icons.movie_outlined, size: 72)
+                : Image.network(
+                    series.posterUrl!,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.movie_outlined, size: 72),
+                  ),
           ),
           const SizedBox(height: 16),
           Text(
