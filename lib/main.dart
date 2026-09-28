@@ -45,7 +45,19 @@ Future<void> main() async {
   final activeIds = <String>{};
 
   if (remoteIndex == null) {
-    activeIds.addAll(builtIns.keys);
+    // Keep startup safe when the remote provider index cannot be fetched.
+    // Sources known to be metadata-only or currently unavailable must not
+    // suddenly reappear just because GitHub/raw is temporarily unreachable.
+    activeIds.addAll(const {
+      'official-youtube',
+      'youku-arabic',
+      'wetv-arabic',
+      'roya',
+      'watanflix',
+      'laroza',
+      'cima4u',
+      'dramacafe',
+    });
   } else {
     for (final descriptor in remoteIndex.providers) {
       metadata[descriptor.id] = descriptor;

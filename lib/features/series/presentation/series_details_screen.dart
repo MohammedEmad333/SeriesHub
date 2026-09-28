@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
 import '../../../core/models/episode.dart';
+import '../../../core/models/playback_source.dart';
 import '../../../core/models/season.dart';
 import '../../../core/models/series.dart';
 import '../../../core/providers/series_provider.dart';
@@ -37,9 +38,13 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
   }
 
   Future<void> _selectInitialSeason() async {
-    final seasons = await _seasons;
-    if (!mounted || seasons.isEmpty || _selectedSeasonId != null) return;
-    _selectSeason(seasons.first);
+    try {
+      final seasons = await _seasons;
+      if (!mounted || seasons.isEmpty || _selectedSeasonId != null) return;
+      _selectSeason(seasons.first);
+    } on Object {
+      // The FutureBuilder below owns the visible error state.
+    }
   }
 
   void _selectSeason(Season season) {
@@ -53,7 +58,18 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
     Episode episode,
     List<Episode> episodes,
   ) async {
-    final sources = await widget.provider.getPlaybackSources(episode.id);
+    List<PlaybackSource> sources;
+    try {
+      sources = await widget.provider.getPlaybackSources(episode.id);
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تعذر جلب رابط التشغيل من هذا المصدر.'),
+        ),
+      );
+      return;
+    }
     if (!mounted) return;
 
     if (sources.isEmpty) {
@@ -120,7 +136,17 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             alignment: Alignment.center,
-            child: const Icon(Icons.movie_outlined, size: 72),
+            clipBehavior: Clip.antiAlias,
+            child: series.posterUrl == null || series.posterUrl!.isEmpty
+                ? const Icon(Icons.movie_outlined, size: 72)
+                : Image.network(
+                    series.posterUrl!,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.movie_outlined, size: 72),
+                  ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -166,6 +192,15 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
           FutureBuilder<List<Season>>(
             future: _seasons,
             builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'تعذر تحميل المواسم والحلقات من هذا المصدر.',
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
               if (!snapshot.hasData) {
                 return const Center(
                   child: CircularProgressIndicator(),
@@ -197,6 +232,15 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
             FutureBuilder<List<Episode>>(
               future: _episodes,
               builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text(
+                      'تعذر تحميل الحلقات من هذا المصدر.',
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
                 if (!snapshot.hasData) {
                   return const Center(
                     child: CircularProgressIndicator(),

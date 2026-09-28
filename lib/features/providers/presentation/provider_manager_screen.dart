@@ -138,6 +138,7 @@ class _ProviderTile extends StatelessWidget {
     final (label, icon) = switch (status) {
       'working' when playback => ('تشغيل متاح', Icons.play_circle_outline),
       'metadata_only' => ('بيانات فقط', Icons.info_outline),
+      'experimental' => ('تجريبي', Icons.science_outlined),
       'broken' => ('متوقف مؤقتًا', Icons.error_outline),
       'disabled' => ('معطل', Icons.block_outlined),
       _ => ('محلي', Icons.storage_outlined),
