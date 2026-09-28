@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/library/library_store.dart';
@@ -29,6 +31,7 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
       widget.provider.getSeasons(widget.series.id);
   String? _selectedSeasonId;
   Future<List<Episode>>? _episodes;
+  String? _loadingEpisodeId;
 
   @override
   void initState() {
@@ -58,11 +61,29 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
     Episode episode,
     List<Episode> episodes,
   ) async {
+    if (_loadingEpisodeId != null) return;
+
+    setState(() => _loadingEpisodeId = episode.id);
+
     List<PlaybackSource> sources;
     try {
-      sources = await widget.provider.getPlaybackSources(episode.id);
+      sources = await widget.provider
+          .getPlaybackSources(episode.id)
+          .timeout(const Duration(seconds: 18));
+    } on TimeoutException {
+      if (!mounted) return;
+      setState(() => _loadingEpisodeId = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'استغرق المصدر وقتًا طويلًا في تجهيز رابط التشغيل. جرّب مرة أخرى.',
+          ),
+        ),
+      );
+      return;
     } on Object {
       if (!mounted) return;
+      setState(() => _loadingEpisodeId = null);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تعذر جلب رابط التشغيل من هذا المصدر.'),
@@ -71,6 +92,8 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
       return;
     }
     if (!mounted) return;
+
+    setState(() => _loadingEpisodeId = null);
 
     if (sources.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -260,8 +283,10 @@ class _SeriesDetailsScreenState extends State<SeriesDetailsScreen> {
                             progress: widget.libraryStore
                                 .progressForEpisode(episode.id)
                                 ?.fraction,
-                            onTap: () =>
-                                _playEpisode(episode, episodes),
+                            loading: _loadingEpisodeId == episode.id,
+                            onTap: _loadingEpisodeId == null
+                                ? () => _playEpisode(episode, episodes)
+                                : () {},
                           ),
                       ],
                     );
@@ -287,11 +312,13 @@ class _EpisodeTile extends StatelessWidget {
   const _EpisodeTile({
     required this.episode,
     required this.progress,
+    required this.loading,
     required this.onTap,
   });
 
   final Episode episode;
   final double? progress;
+  final bool loading;
   final VoidCallback onTap;
 
   @override
@@ -315,9 +342,14 @@ class _EpisodeTile extends StatelessWidget {
           ],
         ],
       ),
-      trailing: Icon(
-        hasProgress ? Icons.play_circle_fill : Icons.play_arrow,
-      ),
+      trailing: loading
+          ? const SizedBox.square(
+              dimension: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(
+              hasProgress ? Icons.play_circle_fill : Icons.play_arrow,
+            ),
       onTap: onTap,
     );
   }
