@@ -82,6 +82,7 @@ class HomeScreen extends StatefulWidget {
     return switch (metadata.status) {
       'working' when metadata.playback => '${provider.name} · تشغيل',
       'metadata_only' => '${provider.name} · بيانات فقط',
+      'experimental' => '${provider.name} · تجريبي',
       'broken' => '${provider.name} · متوقف',
       'disabled' => '${provider.name} · معطل',
       _ => provider.name,
