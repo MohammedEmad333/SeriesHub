@@ -366,7 +366,17 @@ class _SeriesCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.movie_outlined, size: 44),
+                clipBehavior: Clip.antiAlias,
+                child: series.posterUrl == null || series.posterUrl!.isEmpty
+                    ? const Icon(Icons.movie_outlined, size: 44)
+                    : Image.network(
+                        series.posterUrl!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.movie_outlined, size: 44),
+                      ),
               ),
             ),
             const SizedBox(height: 8),
