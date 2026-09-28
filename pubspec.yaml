@@ -1,7 +1,7 @@
 name: serieshub
 description: Arabic-first TV series discovery and viewing app.
 publish_to: "none"
-version: 0.18.0+18
+version: 0.19.0+19
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -19,7 +19,7 @@ dependencies:
   serieshub_providers:
     git:
       url: https://github.com/MohammedEmad333/SeriesHub-Providers.git
-      ref: ef9954122088c1025a9025b80bdae8feec9e7bcc
+      ref: 55246f6a2ba812fc3451e534ff6b9d4892956696
 
 dev_dependencies:
   flutter_test:
