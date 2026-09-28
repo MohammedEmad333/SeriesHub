@@ -19,7 +19,7 @@ dependencies:
   serieshub_providers:
     git:
       url: https://github.com/MohammedEmad333/SeriesHub-Providers.git
-      ref: 55246f6a2ba812fc3451e534ff6b9d4892956696
+      ref: 5053293d0accd799b034202bb8dca47ad341a651
 
 dev_dependencies:
   flutter_test:
